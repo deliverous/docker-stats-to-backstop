@@ -2,7 +2,7 @@
 package translate
 
 import (
-	"github.com/deliverous/collectd-docker/translate/docker"
+	"github.com/deliverous/docker-stats-to-backstop/translate/docker"
 	"testing"
 	"time"
 )
