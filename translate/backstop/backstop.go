@@ -8,7 +8,7 @@ import (
 
 type Metric struct {
 	Name  string    `json:"metric"`
-	Value string    `json:"value"`
+	Value int64     `json:"value"`
 	Time  time.Time `json:"measure_time"`
 }
 
