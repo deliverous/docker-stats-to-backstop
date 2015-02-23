@@ -30,6 +30,13 @@ func Test_ParseJson_CpuStats(t *testing.T) {
 	checkIntValue(t, "SystemCpuUsage", 6616189560000000, stats.Cpu.SystemCpuUsage)
 }
 
+func Test_ParseJson_MemoryStats(t *testing.T) {
+	stats, _ := ParseJson(`{"memory_stats":{ "usage":361316352, "max_usage":600657920, "limit":2147483648}}`)
+
+	checkIntValue(t, "Usage", 361316352, stats.Memory.Usage)
+	checkIntValue(t, "MaxUsage", 600657920, stats.Memory.MaxUsage)
+	checkIntValue(t, "Limit", 2147483648, stats.Memory.Limit)
+}
 func checkIntValue(t *testing.T, fieldName string, expected int64, got int64) {
 	if got != expected {
 		t.Errorf("'%s' verification failed: got %d, expected %d", fieldName, got, expected)

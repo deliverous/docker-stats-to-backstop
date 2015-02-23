@@ -8,6 +8,7 @@ import (
 type ContainerStats struct {
 	Network *NetworkStats ``
 	Cpu     *CpuStats     `json:"cpu_stats"`
+	Memory  *MemoryStats  `json:"memory_stats"`
 }
 
 type NetworkStats struct {
@@ -30,6 +31,12 @@ type CpuUsageStats struct {
 	TotalUsage        int64 `json:"total_usage"`
 	UsageInKernelmode int64 `json:"usage_in_kernelmode"`
 	UsageInUsermode   int64 `json:"usage_in_usermode"`
+}
+
+type MemoryStats struct {
+	Usage    int64 `json:"usage"`
+	MaxUsage int64 `json:"max_usage"`
+	Limit    int64 `json:"limit"`
 }
 
 func ParseJson(data string) (*ContainerStats, error) {
