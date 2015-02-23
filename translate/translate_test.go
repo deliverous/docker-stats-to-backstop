@@ -4,6 +4,7 @@ package translate
 import (
 	"github.com/deliverous/collectd-docker/translate/docker"
 	"testing"
+	"time"
 )
 
 func Test_CpuStats(t *testing.T) {
@@ -43,6 +44,7 @@ func checkNetworkStats(t *testing.T, stats docker.NetworkStats, name string, val
 }
 
 func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, value int64) {
+	stats.Timestamp = time.Date(2015, time.February, 23, 8, 39, 6, 0, time.UTC)
 	metrics := Translate("prefix", stats)
 	if len(metrics) != 1 {
 		t.Fatalf("translation failed, should have only one metric: got %#v", metrics)
@@ -52,6 +54,9 @@ func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, v
 	}
 	if metrics[0].Value != value {
 		t.Errorf("translation failed: expected value '%d', got %d", value, metrics[0].Value)
+	}
+	if metrics[0].Time != stats.Timestamp {
+		t.Errorf("translation failed: expected timestamp '%s', got %s", stats.Timestamp.UTC().String(), metrics[0].Time.UTC().String())
 	}
 }
 

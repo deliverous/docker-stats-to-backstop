@@ -3,12 +3,14 @@ package docker
 
 import (
 	"encoding/json"
+	"time"
 )
 
 type ContainerStats struct {
-	Network NetworkStats ``
-	Cpu     CpuStats     `json:"cpu_stats"`
-	Memory  MemoryStats  `json:"memory_stats"`
+	Timestamp time.Time    `json:"read"`
+	Network   NetworkStats ``
+	Cpu       CpuStats     `json:"cpu_stats"`
+	Memory    MemoryStats  `json:"memory_stats"`
 }
 
 type NetworkStats struct {

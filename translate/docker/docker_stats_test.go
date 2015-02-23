@@ -3,7 +3,16 @@ package docker
 
 import (
 	"testing"
+	"time"
 )
+
+func Test_ParseDockerStats_Timestamp(t *testing.T) {
+	stats, _ := ParseDockerStats(`{"read":"2015-02-23T09:39:06.071088072+01:00"}`)
+	expected := time.Date(2015, time.February, 23, 8, 39, 6, 0, time.UTC)
+	if stats.Timestamp.Unix() != expected.Unix() {
+		t.Errorf("timestamp: got: %s, expected: %s", stats.Timestamp.UTC().String(), expected.String())
+	}
+}
 
 func Test_ParseDockerStats_NetworkStats_Rx(t *testing.T) {
 	stats, _ := ParseDockerStats(`{"network":{"rx_bytes":120062,"rx_packets":1425,"rx_errors":1,"rx_dropped":2}}`)
