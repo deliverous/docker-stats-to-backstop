@@ -8,7 +8,7 @@ import (
 )
 
 func Translate(prefix string, stats *docker.ContainerStats) []backstop.Metric {
-	c := collector{Prefix: prefix, Timestamp: stats.Timestamp, Metrics: []backstop.Metric{}}
+	c := collector{prefix: prefix, timestamp: stats.Timestamp, metrics: []backstop.Metric{}}
 	c.add("cpu.system", stats.Cpu.SystemCpuUsage)
 	c.add("cpu.total", stats.Cpu.CpuUsage.TotalUsage)
 	c.add("cpu.kernel", stats.Cpu.CpuUsage.UsageInKernelmode)
@@ -24,22 +24,21 @@ func Translate(prefix string, stats *docker.ContainerStats) []backstop.Metric {
 	c.add("network.tx_packets", stats.Network.TxPackets)
 	c.add("network.tx_errors", stats.Network.TxErrors)
 	c.add("network.tx_dropped", stats.Network.TxDropped)
-
-	return c.Metrics
+	return c.metrics
 }
 
 type collector struct {
-	Prefix    string
-	Timestamp time.Time
-	Metrics   []backstop.Metric
+	prefix    string
+	timestamp time.Time
+	metrics   []backstop.Metric
 }
 
 func (c *collector) add(name string, value *int64) {
 	if value != nil {
-		c.Metrics = append(c.Metrics, backstop.Metric{
-			Name:      c.Prefix + "." + name,
+		c.metrics = append(c.metrics, backstop.Metric{
+			Name:      c.prefix + "." + name,
 			Value:     *value,
-			Timestamp: c.Timestamp,
+			Timestamp: c.timestamp,
 		})
 	}
 }
