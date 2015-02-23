@@ -14,10 +14,10 @@ type NetworkStats struct {
 	RxPackets int64 `json:"rx_packets"`
 	RxErrors  int64 `json:"rx_errors"`
 	RxDropped int64 `json:"rx_dropped"`
-	TxBytes   int64
-	TxPackets int64
-	TxErrors  int64
-	TxDropped int64
+	TxBytes   int64 `json:"tx_bytes"`
+	TxPackets int64 `json:"tx_packets"`
+	TxErrors  int64 `json:"tx_errors"`
+	TxDropped int64 `json:"tx_dropped"`
 }
 
 func ParseJson(data string) (*ContainerStats, error) {
