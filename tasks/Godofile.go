@@ -2,7 +2,9 @@
 package main
 
 import (
+	"fmt"
 	. "gopkg.in/godo.v1"
+	"time"
 )
 
 func tasks(p *Project) {
@@ -16,6 +18,11 @@ func tasks(p *Project) {
 			command += " --cover"
 		}
 		Run(command)
+		now := time.Now()
+		fmt.Printf("Last run finished at %d-%02d-%02d %02d:%02d:%02d\n",
+			now.Year(), now.Month(), now.Day(),
+			now.Hour(), now.Minute(), now.Second())
+
 	}).Watch("**/*.go").Debounce(1000)
 }
 
