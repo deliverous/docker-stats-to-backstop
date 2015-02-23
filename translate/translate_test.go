@@ -55,29 +55,11 @@ func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, v
 	if metrics[0].Value != value {
 		t.Errorf("translation failed: expected value '%d', got %d", value, metrics[0].Value)
 	}
-	if metrics[0].Time != stats.Timestamp {
-		t.Errorf("translation failed: expected timestamp '%s', got %s", stats.Timestamp.UTC().String(), metrics[0].Time.UTC().String())
+	if metrics[0].Timestamp != stats.Timestamp {
+		t.Errorf("translation failed: expected timestamp '%s', got %s", stats.Timestamp.UTC().String(), metrics[0].Timestamp.UTC().String())
 	}
 }
 
 func v(value int64) *int64 {
 	return &value
 }
-
-/*
-type ContainerStats struct {
-  → Network *NetworkStats ``
-}
-
-type NetworkStats struct {
-  → RxBytes   int64 `json:"rx_bytes"`
-  → RxPackets int64 `json:"rx_packets"`
-  → RxErrors  int64 `json:"rx_errors"`
-  → RxDropped int64 `json:"rx_dropped"`
-  → TxBytes   int64 `json:"tx_bytes"`
-  → TxPackets int64 `json:"tx_packets"`
-  → TxErrors  int64 `json:"tx_errors"`
-  → TxDropped int64 `json:"tx_dropped"`
-}
-
-*/

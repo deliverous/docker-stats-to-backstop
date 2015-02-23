@@ -37,9 +37,9 @@ type collector struct {
 func (c *collector) add(name string, value *int64) {
 	if value != nil {
 		c.Metrics = append(c.Metrics, backstop.Metric{
-			Name:  c.Prefix + "." + name,
-			Value: *value,
-			Time:  c.Timestamp,
+			Name:      c.Prefix + "." + name,
+			Value:     *value,
+			Timestamp: c.Timestamp,
 		})
 	}
 }

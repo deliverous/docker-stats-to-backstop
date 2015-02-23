@@ -7,9 +7,9 @@ import (
 )
 
 type Metric struct {
-	Name  string    `json:"metric"`
-	Value int64     `json:"value"`
-	Time  time.Time `json:"measure_time"`
+	Name      string    `json:"metric"`
+	Value     int64     `json:"value"`
+	Timestamp time.Time `json:"measure_time"`
 }
 
 type Metrics []Metric
