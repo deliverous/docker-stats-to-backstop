@@ -2,7 +2,6 @@
 package docker
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -39,10 +38,4 @@ type MemoryStats struct {
 	Usage    *int64 `json:"usage"`
 	MaxUsage *int64 `json:"max_usage"`
 	Limit    *int64 `json:"limit"`
-}
-
-func ParseDockerStats(data string) (*ContainerStats, error) {
-	var content *ContainerStats
-	err := json.Unmarshal([]byte(data), &content)
-	return content, err
 }
