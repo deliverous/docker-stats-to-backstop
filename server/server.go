@@ -7,9 +7,9 @@ import (
 	"github.com/deliverous/docker-stats-to-backstop/translate"
 	"github.com/deliverous/docker-stats-to-backstop/translate/backstop"
 	"github.com/deliverous/docker-stats-to-backstop/translate/docker"
-	"gopkg.in/jmcvetta/napping.v1"
+	//"gopkg.in/jmcvetta/napping.v1"
 	"net/http"
-	"net/url"
+	//"net/url"
 	"os"
 )
 
@@ -37,15 +37,7 @@ func getDockerStats(urlString string) (*docker.ContainerStats, error) {
 	transport.RegisterProtocol("unix", NewSocketTransport())
 	client := &http.Client{Transport: transport}
 
-	u, err := url.Parse(urlString)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("url: %#v\n", u)
-	session := &napping.Session{Userinfo: u.User, Log: false, Client: client}
-	stats := &docker.ContainerStats{}
-	u.User = nil
-	_, err = docker.GetDockerStats(session, u.String(), stats)
+	stats, err := docker.GetDockerStats(client, urlString)
 	if err != nil {
 		return nil, err
 	}

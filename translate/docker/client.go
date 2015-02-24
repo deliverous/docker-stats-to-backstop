@@ -2,13 +2,27 @@
 package docker
 
 import (
-	"gopkg.in/jmcvetta/napping.v1"
+	"encoding/json"
+	"net/http"
 )
 
-func GetDockerStats(session *napping.Session, url string, stats *ContainerStats) (int, error) {
-	response, err := session.Get(url, nil, stats, nil)
+func GetDockerStats(client *http.Client, urlStr string) (*ContainerStats, error) {
+	request, err := http.NewRequest("GET", urlStr, nil)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return response.Status(), nil
+
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	decoder := json.NewDecoder(response.Body)
+	stats := &ContainerStats{}
+	err = decoder.Decode(stats)
+	if err != nil {
+		return nil, err
+	}
+	return stats, nil
 }
