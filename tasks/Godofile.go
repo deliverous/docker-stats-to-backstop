@@ -22,7 +22,10 @@ func tasks(p *Project) {
 		fmt.Printf("Last run finished at %d-%02d-%02d %02d:%02d:%02d\n",
 			now.Year(), now.Month(), now.Day(),
 			now.Hour(), now.Minute(), now.Second())
+	}).Watch("**/*.go").Debounce(1000)
 
+	p.Task("run", D{"tests"}, func() {
+		Start("server.go", In{"server"})
 	}).Watch("**/*.go").Debounce(1000)
 }
 
