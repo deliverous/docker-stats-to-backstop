@@ -32,18 +32,6 @@ var (
 	dockerUrl   = flag.String("docker", env("SRV_DOCKER", "unix:///var/run/docker.sock"), "URL for connecting docker server")
 )
 
-func getDockerStats(urlString string) (*docker.ContainerStats, error) {
-	transport := &http.Transport{}
-	transport.RegisterProtocol("unix", NewSocketTransport())
-	client := &http.Client{Transport: transport}
-
-	stats, err := docker.GetDockerStats(client, urlString)
-	if err != nil {
-		return nil, err
-	}
-	return stats, nil
-}
-
 func main() {
 	flag.Parse()
 	fmt.Printf("== config =======================\n")
@@ -51,10 +39,14 @@ func main() {
 	fmt.Printf("backstop URL: %s\n", *backstopUrl)
 	fmt.Printf("== starting =====================\n")
 
+	transport := &http.Transport{}
+	transport.RegisterProtocol("unix", NewSocketTransport())
+	client := &http.Client{Transport: transport}
+
 	for _, container := range flag.Args() {
-		stats, _ := getDockerStats(fmt.Sprintf("%s/v1.17/containers/%s/stats", *dockerUrl, container))
+		stats, _ := docker.GetDockerStats(client, fmt.Sprintf("%s/v1.17/containers/%s/stats", *dockerUrl, container))
 		metrics := translate.Translate("docker."+container, stats)
-		data, _ := backstop.RenderMetrics(metrics)
-		fmt.Printf("Metrics: %s\n", data)
+		fmt.Printf("Metrics: %#v\n", metrics)
+		backstop.SendMetrics(client, *backstopUrl, metrics)
 	}
 }
