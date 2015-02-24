@@ -2,13 +2,27 @@
 package backstop
 
 import (
-	"gopkg.in/jmcvetta/napping.v1"
+	"bytes"
+	"encoding/json"
+	"net/http"
 )
 
-func SendMetrics(session *napping.Session, url string, metrics []Metric) (int, error) {
-	response, err := session.Post(url, metrics, nil, nil)
+func SendMetrics(client *http.Client, urlStr string, metrics []Metric) error {
+	payload, err := json.Marshal(&metrics)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return response.Status(), nil
+
+	request, err := http.NewRequest("POST", urlStr, bytes.NewBuffer(payload))
+	if err != nil {
+		return err
+	}
+	request.Header.Add("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	response.Body.Close()
+	return nil
 }
