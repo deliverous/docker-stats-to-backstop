@@ -1,13 +1,16 @@
 package main
 
 import (
+	"bufio"
 	"errors"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 func NewSocketTransport() http.RoundTripper {
@@ -24,14 +27,24 @@ func (transport *socketTransport) RoundTrip(request *http.Request) (*http.Respon
 	}
 	request.URL.Path = strings.TrimPrefix(request.URL.Path, socket)
 
-	dial, err := net.Dial("unix", socket)
+	dial, err := net.DialTimeout("unix", socket, 32*time.Second)
 	if err != nil {
 		return nil, err
 	}
 	socketClientConn := httputil.NewClientConn(dial, nil)
 	defer socketClientConn.Close()
 
-	return socketClientConn.Do(request)
+	response, err := socketClientConn.Do(request)
+
+	// Hack {
+	line, err := bufio.NewReader(response.Body).ReadString('\n')
+	if err != nil {
+		return nil, err
+	}
+	response.Body = ioutil.NopCloser(strings.NewReader(line))
+	// Hack }
+
+	return response, err
 }
 
 func split(urlPath string) (string, error) {
