@@ -1,5 +1,5 @@
 // vim: ts=2 nowrap
-package main
+package server
 
 import (
 	"errors"

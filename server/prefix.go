@@ -1,4 +1,5 @@
-package main
+// vim: ts=2:nowrap
+package server
 
 import (
 	"encoding/json"
