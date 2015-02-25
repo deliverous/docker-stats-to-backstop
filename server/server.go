@@ -2,37 +2,22 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/deliverous/docker-stats-to-backstop/translate"
 	"github.com/deliverous/docker-stats-to-backstop/translate/backstop"
 	"github.com/deliverous/docker-stats-to-backstop/translate/docker"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 )
-
-func env(key string, missing string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return missing
-}
-
-func panicOnError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
 
 var (
 	help        = flag.Bool("help", false, "Get help")
 	backstopUrl = flag.String("backstop", env("SRV_BACKSTOP", ""), "URL for connecting backsop server")
 	dockerUrl   = flag.String("docker", env("SRV_DOCKER", "unix:///var/run/docker.sock"), "URL for connecting docker server")
 	prefix      = flag.String("prefix", "", "JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier")
+	poll        = flag.String("poll", "5m", "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
 )
 
 func main() {
@@ -48,6 +33,11 @@ func main() {
 		log.Fatalf("ERROR: cannot load prefix rules: %s", err)
 	}
 
+	duration, err := time.ParseDuration(*poll)
+	if err != nil {
+		log.Fatalf("ERROR: cannot parse duration '%s': %s", *poll, err)
+	}
+
 	transport := &http.Transport{}
 	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
 	client := &http.Client{Transport: transport}
@@ -55,62 +45,43 @@ func main() {
 	dockerApi := docker.NewDockerApi(client, *dockerUrl)
 
 	version, err := dockerApi.GetApiVersion()
-	panicOnError(err)
+	if err != nil {
+		log.Fatalf("ERROR: cannot get docker API version: %s", err)
+	}
+
 	if version != docker.ApiVersion {
-		fmt.Println("WARNING: not using the latest api version")
-		fmt.Printf("Using  : '%s'\n", docker.ApiVersion)
-		fmt.Printf("Current: '%s'\n", version)
+		log.Println("WARNING: not using the latest api version")
+		log.Printf("Using  : '%s'\n", docker.ApiVersion)
+		log.Printf("Current: '%s'\n", version)
 	}
 
-	containers, err := dockerApi.GetContainers()
-	panicOnError(err)
+	for {
+		if containers, err := dockerApi.GetContainers(); err != nil {
+			log.Printf("ERROR: cannot get docker containers list: %s", err)
+		} else {
+			for _, container := range containers {
+				prefix := computePrefix(&container, prefixRule)
 
-	for _, container := range containers {
-		prefix := computePrefix(&container, prefixRule)
+				log.Printf("Processing container %s (%s)\n", container.Id[:12], prefix)
+				stats, err := dockerApi.GetContainerStats(container.Id)
+				if err != nil {
+					log.Printf("ERROR: cannot get container stats: %s\n", err)
+					continue
+				}
+				err = backstop.SendMetrics(client, *backstopUrl, translate.Translate(prefix, stats))
+				if err != nil {
+					log.Printf("ERROR: cannot send container stats: %s\n", err)
+				}
+			}
+		}
 
-		fmt.Printf("Processing container %s (%s)\n", container.Id, prefix)
-		stats, err := dockerApi.GetContainerStats(container.Id)
-		if err != nil {
-			fmt.Printf("ERROR: cannot get container stats: %s\n", err)
-			continue
-		}
-		err = backstop.SendMetrics(client, *backstopUrl, translate.Translate(prefix, stats))
-		if err != nil {
-			fmt.Printf("ERROR: cannot send container stats: %s\n", err)
-		}
+		time.Sleep(duration)
 	}
 }
 
-type prefixRule struct {
-	Regexp string
-	Into   string
-	parsed *regexp.Regexp
-}
-
-func loadPrefixRule(definition string) (*prefixRule, error) {
-	if definition == "" {
-		return nil, nil
+func env(key string, missing string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
 	}
-
-	s := prefixRule{}
-	if err := json.Unmarshal([]byte(definition), &s); err != nil {
-		return nil, err
-	}
-	if r, err := regexp.Compile(s.Regexp); err != nil {
-		return nil, err
-	} else {
-		s.parsed = r
-	}
-	return &s, nil
-}
-
-func computePrefix(container *docker.Container, rule *prefixRule) string {
-	prefix := container.Id
-	if len(container.Names) > 0 {
-		prefix = container.Names[0]
-		if rule != nil {
-			return rule.parsed.ReplaceAllString(prefix, rule.Into)
-		}
-	}
-	return prefix
+	return missing
 }
