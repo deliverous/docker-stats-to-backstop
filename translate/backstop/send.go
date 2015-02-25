@@ -4,6 +4,7 @@ package backstop
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -24,5 +25,9 @@ func SendMetrics(client *http.Client, urlStr string, metrics []Metric) error {
 		return err
 	}
 	response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		return errors.New(http.StatusText(response.StatusCode))
+	}
 	return nil
 }

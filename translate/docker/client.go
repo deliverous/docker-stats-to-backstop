@@ -3,6 +3,7 @@ package docker
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"path"
 )
@@ -58,6 +59,10 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 		return err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		return errors.New(http.StatusText(response.StatusCode))
+	}
 	if response.StatusCode < 300 {
 		return json.NewDecoder(response.Body).Decode(data)
 	}

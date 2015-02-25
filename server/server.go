@@ -57,10 +57,20 @@ func main() {
 	panicOnError(err)
 
 	for _, container := range containers {
-		fmt.Printf("Processing container %s\n", container.Id)
-		stats, _ := dockerApi.GetContainerStats(container.Id)
-		metrics := translate.Translate("docker."+container.Id, stats)
-		fmt.Printf("metrics: %#v\n", metrics)
-		backstop.SendMetrics(client, *backstopUrl, metrics)
+		prefix := container.Id
+		if len(container.Names) > 0 {
+			prefix = container.Names[0]
+		}
+
+		fmt.Printf("Processing container %s (%s)\n", container.Id, prefix)
+		stats, err := dockerApi.GetContainerStats(container.Id)
+		if err != nil {
+			fmt.Printf("ERROR: cannot get container stats: %s\n", err)
+			continue
+		}
+		err = backstop.SendMetrics(client, *backstopUrl, translate.Translate(prefix, stats))
+		if err != nil {
+			fmt.Printf("ERROR: cannot send container stats: %s\n", err)
+		}
 	}
 }
