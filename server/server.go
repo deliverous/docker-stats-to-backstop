@@ -43,9 +43,24 @@ func main() {
 	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
 	client := &http.Client{Transport: transport}
 
-	for _, container := range flag.Args() {
-		stats, _ := docker.GetDockerStats(client, fmt.Sprintf("%s/v1.17/containers/%s/stats", *dockerUrl, container))
-		metrics := translate.Translate("docker."+container, stats)
+	dockerApi := docker.NewDockerApi(client, *dockerUrl)
+
+	version, err := dockerApi.GetApiVersion()
+	panicOnError(err)
+	if version != docker.ApiVersion {
+		fmt.Println("WARNING: not using the latest api version")
+		fmt.Printf("Using  : '%s'\n", docker.ApiVersion)
+		fmt.Printf("Current: '%s'\n", version)
+	}
+
+	containers, err := dockerApi.GetContainers()
+	panicOnError(err)
+
+	for _, container := range containers {
+		fmt.Printf("Processing container %s\n", container.Id)
+		stats, _ := dockerApi.GetContainerStats(container.Id)
+		metrics := translate.Translate("docker."+container.Id, stats)
+		fmt.Printf("metrics: %#v\n", metrics)
 		backstop.SendMetrics(client, *backstopUrl, metrics)
 	}
 }
