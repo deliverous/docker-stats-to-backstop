@@ -7,10 +7,9 @@ import (
 	"github.com/deliverous/docker-stats-to-backstop/translate"
 	"github.com/deliverous/docker-stats-to-backstop/translate/backstop"
 	"github.com/deliverous/docker-stats-to-backstop/translate/docker"
-	//"gopkg.in/jmcvetta/napping.v1"
 	"net/http"
-	//"net/url"
 	"os"
+	"time"
 )
 
 func env(key string, missing string) string {
@@ -40,7 +39,7 @@ func main() {
 	fmt.Printf("== starting =====================\n")
 
 	transport := &http.Transport{}
-	transport.RegisterProtocol("unix", NewSocketTransport())
+	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
 	client := &http.Client{Transport: transport}
 
 	for _, container := range flag.Args() {
