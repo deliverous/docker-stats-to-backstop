@@ -24,45 +24,35 @@ func NewDockerApi(client *http.Client, baseUrl string) *DockerApi {
 }
 
 func (api *DockerApi) GetApiVersion() (string, error) {
-	request, err := http.NewRequest("GET", api.BaseUrl+"/version", nil)
-	if err != nil {
-		return "", err
-	}
-
 	version := struct{ ApiVersion string }{}
-	if err := api.processRequest(request, &version); err != nil {
+	if err := api.get(api.BaseUrl+"/version", &version); err != nil {
 		return "", err
 	}
 	return "v" + version.ApiVersion, nil
 }
 
 func (api *DockerApi) GetContainers() ([]Container, error) {
-	request, err := http.NewRequest("GET", api.url("containers", "json"), nil)
-	if err != nil {
-		return nil, err
-	}
-
 	containers := []Container{}
-	if err := api.processRequest(request, &containers); err != nil {
+	if err := api.get(api.url("containers", "json"), &containers); err != nil {
 		return nil, err
 	}
 	return containers, nil
 }
 
 func (api *DockerApi) GetContainerStats(container string) (*ContainerStats, error) {
-	request, err := http.NewRequest("GET", api.url("containers", container, "stats"), nil)
-	if err != nil {
-		return nil, err
-	}
-
 	stats := &ContainerStats{}
-	if err := api.processRequest(request, stats); err != nil {
+	if err := api.get(api.url("containers", container, "stats"), stats); err != nil {
 		return nil, err
 	}
 	return stats, nil
 }
 
-func (api *DockerApi) processRequest(request *http.Request, data interface{}) error {
+func (api *DockerApi) get(urlStr string, data interface{}) error {
+	request, err := http.NewRequest("GET", urlStr, nil)
+	if err != nil {
+		return err
+	}
+
 	response, err := api.Client.Do(request)
 	if err != nil {
 		return err
