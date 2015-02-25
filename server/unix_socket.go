@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -40,13 +41,13 @@ type socketTransport struct {
 }
 
 func (transport *socketTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	socket, err := findSocket(path.Join(request.URL.Host, request.URL.Path), transport.predicate)
+	u, err := updateUrl(*request.URL, transport.predicate)
 	if err != nil {
 		return nil, err
 	}
-	request.URL.Path = strings.TrimPrefix(request.URL.Path, socket)
+	request.URL = &u
 
-	dial, err := net.DialTimeout("unix", socket, transport.timeout)
+	dial, err := net.DialTimeout("unix", u.Host, transport.timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -55,13 +56,26 @@ func (transport *socketTransport) RoundTrip(request *http.Request) (*http.Respon
 	return socketClientConn.Do(request)
 }
 
+func updateUrl(u url.URL, predicate SocketPredicate) (url.URL, error) {
+	urlPath := path.Join(u.Host, u.Path)
+	if !path.IsAbs(urlPath) {
+		urlPath = "/" + urlPath
+	}
+	socket, err := findSocket(urlPath, predicate)
+	if err != nil {
+		return u, err
+	}
+	u.Host = socket
+	u.Path = strings.TrimPrefix(urlPath, socket)
+	return u, nil
+}
+
 func findSocket(urlPath string, predicate SocketPredicate) (string, error) {
-	socket := path.Clean(urlPath)
-	for socket != "" {
-		if predicate(socket) {
-			return socket, nil
+	for urlPath != "/" {
+		if predicate(urlPath) {
+			return urlPath, nil
 		}
-		socket = path.Dir(socket)
+		urlPath = path.Dir(urlPath)
 	}
 	return "", ErrNoSocket
 }
