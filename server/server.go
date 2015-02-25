@@ -43,7 +43,10 @@ func main() {
 		os.Exit(0)
 	}
 
-	prefixRule := loadPrefixRule(*prefix)
+	prefixRule, err := loadPrefixRule(*prefix)
+	if err != nil {
+		log.Fatalf("ERROR: cannot load prefix rules: %s", err)
+	}
 
 	transport := &http.Transport{}
 	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
@@ -84,21 +87,21 @@ type prefixRule struct {
 	parsed *regexp.Regexp
 }
 
-func loadPrefixRule(definition string) *prefixRule {
+func loadPrefixRule(definition string) (*prefixRule, error) {
 	if definition == "" {
-		return nil
+		return nil, nil
 	}
 
 	s := prefixRule{}
 	if err := json.Unmarshal([]byte(definition), &s); err != nil {
-		log.Fatalf("ERROR: invalid rewrite definition: %s", err)
+		return nil, err
 	}
 	if r, err := regexp.Compile(s.Regexp); err != nil {
-		log.Fatalf("ERROR: invalid regexp: %s", err)
+		return nil, err
 	} else {
 		s.parsed = r
 	}
-	return &s
+	return &s, nil
 }
 
 func computePrefix(container *docker.Container, rule *prefixRule) string {
