@@ -33,10 +33,11 @@ var (
 
 func main() {
 	flag.Parse()
-	fmt.Printf("== config =======================\n")
-	fmt.Printf("docker URL  : %s\n", *dockerUrl)
-	fmt.Printf("backstop URL: %s\n", *backstopUrl)
-	fmt.Printf("== starting =====================\n")
+
+	if *help {
+		flag.Usage()
+		os.Exit(0)
+	}
 
 	transport := &http.Transport{}
 	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
@@ -45,7 +46,6 @@ func main() {
 	for _, container := range flag.Args() {
 		stats, _ := docker.GetDockerStats(client, fmt.Sprintf("%s/v1.17/containers/%s/stats", *dockerUrl, container))
 		metrics := translate.Translate("docker."+container, stats)
-		fmt.Printf("Metrics: %#v\n", metrics)
 		backstop.SendMetrics(client, *backstopUrl, metrics)
 	}
 }
