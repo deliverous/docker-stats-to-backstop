@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration time.Duration) {
+func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration time.Duration, verbose bool) {
 	prefixRule, err := loadPrefixRule(prefix)
 	if err != nil {
 		log.Fatalf("ERROR: cannot load prefix rules: %s", err)
@@ -19,7 +19,7 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 	transport := &http.Transport{}
 	client := &http.Client{Transport: transport, Timeout: 32 * time.Second}
 
-	dockerApi := docker.NewDockerApi(client, dockerUrl)
+	dockerApi := docker.NewDockerApi(client, dockerUrl, verbose)
 
 	version, err := dockerApi.GetApiVersion()
 	if err != nil {
@@ -45,7 +45,7 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 					log.Printf("ERROR: cannot get container stats: %s\n", err)
 					continue
 				}
-				err = backstop.SendMetrics(client, backstopUrl, translate.Translate(prefix, stats))
+				err = backstop.SendMetrics(client, backstopUrl, translate.Translate(prefix, stats), verbose)
 				if err != nil {
 					log.Printf("ERROR: cannot send container stats: %s\n", err)
 				}

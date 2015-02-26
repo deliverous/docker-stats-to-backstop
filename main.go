@@ -15,6 +15,7 @@ var (
 	dockerUrl   = flag.String("docker", env("SRV_DOCKER", "http://127.0.0.1:2375"), "URL for connecting docker server")
 	prefix      = flag.String("prefix", env("SRV_PREFIX", ""), "JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier")
 	poll        = flag.String("poll", env("SRV_PREFIX", "5m"), "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
+	verbose     = flag.Bool("verbose", false, "Enable the verbose mode")
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 		log.Fatalf("ERROR: cannot parse duration '%s': %s", *poll, err)
 	}
 
-	server.ServeForever(*dockerUrl, *backstopUrl, *prefix, duration)
+	server.ServeForever(*dockerUrl, *backstopUrl, *prefix, duration, *verbose)
 }
 
 func env(key string, missing string) string {

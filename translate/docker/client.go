@@ -4,6 +4,8 @@ package docker
 import (
 	"encoding/json"
 	"errors"
+	"github.com/deliverous/docker-stats-to-backstop/utils"
+	"log"
 	"net/http"
 	"path"
 )
@@ -15,12 +17,14 @@ const (
 type DockerApi struct {
 	Client  *http.Client
 	BaseUrl string
+	Verbose bool
 }
 
-func NewDockerApi(client *http.Client, baseUrl string) *DockerApi {
+func NewDockerApi(client *http.Client, baseUrl string, verbose bool) *DockerApi {
 	return &DockerApi{
 		Client:  client,
 		BaseUrl: baseUrl,
+		Verbose: verbose,
 	}
 }
 
@@ -54,11 +58,25 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 		return err
 	}
 
+	if api.Verbose {
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println("REQUEST")
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println(utils.PrettyPrint(request))
+	}
+
 	response, err := api.Client.Do(request)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
+
+	if api.Verbose {
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println("RESPONSE")
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println(utils.PrettyPrint(response))
+	}
 
 	if response.StatusCode >= 400 {
 		return errors.New(http.StatusText(response.StatusCode))
