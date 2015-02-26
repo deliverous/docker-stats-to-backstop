@@ -55,8 +55,8 @@ func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, v
 	if metrics[0].Value != value {
 		t.Errorf("translation failed: expected value '%d', got %d", value, metrics[0].Value)
 	}
-	if metrics[0].Timestamp != stats.Timestamp {
-		t.Errorf("translation failed: expected timestamp '%s', got %s", stats.Timestamp.UTC().String(), metrics[0].Timestamp.UTC().String())
+	if metrics[0].Timestamp != stats.Timestamp.Unix() {
+		t.Errorf("translation failed: expected timestamp '%d', got %d", stats.Timestamp.Unix(), metrics[0].Timestamp)
 	}
 }
 

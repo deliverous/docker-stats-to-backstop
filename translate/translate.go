@@ -38,7 +38,7 @@ func (c *collector) add(name string, value *int64) {
 		c.metrics = append(c.metrics, backstop.Metric{
 			Name:      c.prefix + "." + name,
 			Value:     *value,
-			Timestamp: c.timestamp,
+			Timestamp: c.timestamp.Unix(),
 		})
 	}
 }
