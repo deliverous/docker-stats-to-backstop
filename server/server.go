@@ -17,8 +17,7 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 	}
 
 	transport := &http.Transport{}
-	transport.RegisterProtocol("unix", NewSocketTransport(LstatSocketPredicate, 2*time.Second))
-	client := &http.Client{Transport: transport}
+	client := &http.Client{Transport: transport, Timeout: 32 * time.Second}
 
 	dockerApi := docker.NewDockerApi(client, dockerUrl)
 

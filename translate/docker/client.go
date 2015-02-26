@@ -70,5 +70,5 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 }
 
 func (api *DockerApi) url(parts ...string) string {
-	return path.Join(api.BaseUrl, ApiVersion, path.Join(parts...))
+	return api.BaseUrl + "/" + ApiVersion + "/" + path.Join(parts...)
 }
