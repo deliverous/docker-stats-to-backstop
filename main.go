@@ -14,7 +14,7 @@ var (
 	backstopUrl = flag.String("backstop", env("SRV_BACKSTOP", ""), "URL for connecting backsop server")
 	dockerUrl   = flag.String("docker", env("SRV_DOCKER", "unix:///var/run/docker.sock"), "URL for connecting docker server")
 	prefix      = flag.String("prefix", env("SRV_PREFIX", ""), "JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier")
-	poll        = flag.String("poll", env("SRV_PREFIX", "5m"), "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
+	poll        = flag.String("poll", env("SRV_POLL", "5m"), "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
 	verbose     = flag.Bool("verbose", false, "Enable the verbose mode")
 )
 
