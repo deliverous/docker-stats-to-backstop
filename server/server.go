@@ -13,7 +13,7 @@ import (
 func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration time.Duration, verbose bool) {
 	prefixRule, err := loadPrefixRule(prefix)
 	if err != nil {
-		log.Fatalf("ERROR: cannot load prefix rules: %s", err)
+		log.Fatalf("ERROR: cannot load prefix '%s' : %s", prefix, err)
 	}
 
 	transport := &http.Transport{}
