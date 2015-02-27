@@ -12,8 +12,8 @@ docker stats API is available from docker api v1.17, deliver in docker 1.5
 
 Docker stats to backstop support 3 parameters :
 * --backstop : URL for connecting backsop server
-* --docker : URL for connecting docker server like "unix:///var/run/docker.sock" or "http://docker:2375"
-* --prefix : JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier like {"regexp":"(.*)\\..*\\.(.*)\\..*","into":"$1.$2"} to have `my.container.name` identify in graphite by `my.name`
+* --docker : URL for connecting docker server like `unix:///var/run/docker.sock` or `http://docker:2375`
+* --prefix : JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier like `{"regexp":"(.*)\\..*\\.(.*)\\..*","into":"$1.$2"}` to have `my.container.name` identify in graphite by `my.name`
 * --poll : Polling interval. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'"
 
 All this parameters can be set by environement :
