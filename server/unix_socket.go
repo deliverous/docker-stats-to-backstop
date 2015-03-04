@@ -3,7 +3,6 @@ package server
 
 import (
 	"errors"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
