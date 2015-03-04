@@ -88,7 +88,6 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 }
 
 func closeBody(response *http.Response) {
-	log.Printf("closing body...\n")
 	err := response.Body.Close()
 	if err != nil {
 		log.Printf("ERROR: cannot close body: %s\n", err)
