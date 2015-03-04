@@ -3,6 +3,7 @@ package server
 
 import (
 	"errors"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -47,6 +48,7 @@ func (transport *socketTransport) RoundTrip(request *http.Request) (*http.Respon
 
 	inner := &http.Transport{
 		DisableCompression: true,
+		DisableKeepAlives:  true,
 		Dial: func(proto, addr string) (conn net.Conn, err error) {
 			return net.DialTimeout("unix", socket, transport.timeout)
 		}}

@@ -69,7 +69,7 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer response.Body.Close()
+	defer closeBody(response)
 
 	if api.Verbose {
 		log.Println("--------------------------------------------------------------------------------")
@@ -85,6 +85,14 @@ func (api *DockerApi) get(urlStr string, data interface{}) error {
 		return json.NewDecoder(response.Body).Decode(data)
 	}
 	return nil
+}
+
+func closeBody(response *http.Response) {
+	log.Printf("closing body...\n")
+	err := response.Body.Close()
+	if err != nil {
+		log.Printf("ERROR: cannot close body: %s\n", err)
+	}
 }
 
 func (api *DockerApi) url(parts ...string) string {
