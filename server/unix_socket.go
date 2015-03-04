@@ -30,26 +30,23 @@ func ExtentionSocketPredicate(path string) bool {
 	return strings.HasSuffix(path, ".sock")
 }
 
-func NewSocketTransport(predicate SocketPredicate, timeout time.Duration) http.RoundTripper {
-	return &socketTransport{predicate: predicate, timeout: timeout}
+type SocketTransport struct {
+	Predicate         SocketPredicate
+	Timeout           time.Duration
+	DisableKeepAlives bool
 }
 
-type socketTransport struct {
-	timeout   time.Duration
-	predicate SocketPredicate
-}
-
-func (transport *socketTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	socket, path, err := parseUnixUrl(*request.URL, transport.predicate)
+func (transport *SocketTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	socket, path, err := parseUnixUrl(*request.URL, transport.Predicate)
 	if err != nil {
 		return nil, err
 	}
 
 	inner := &http.Transport{
 		DisableCompression: true,
-		DisableKeepAlives:  true,
+		DisableKeepAlives:  transport.DisableKeepAlives,
 		Dial: func(proto, addr string) (conn net.Conn, err error) {
-			return net.DialTimeout("unix", socket, transport.timeout)
+			return net.DialTimeout("unix", socket, transport.Timeout)
 		}}
 
 	request.URL.Scheme = "http"
