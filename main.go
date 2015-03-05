@@ -31,7 +31,12 @@ func main() {
 		log.Fatalf("ERROR: cannot parse duration '%s': %s", *poll, err)
 	}
 
-	server.ServeForever(*dockerUrl, *backstopUrl, *prefix, duration, *verbose)
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("ERROR: cannot get hostname : %s", err)
+	}
+
+	server.ServeForever(*dockerUrl, *backstopUrl, *prefix, duration, *verbose, hostname)
 }
 
 func env(key string, missing string) string {

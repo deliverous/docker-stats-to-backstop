@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration time.Duration, verbose bool) {
+func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration time.Duration, verbose bool, hostname string) {
 	prefixRule, err := loadPrefixRule(prefix)
 	if err != nil {
 		log.Fatalf("ERROR: cannot load prefix '%s' : %s", prefix, err)
@@ -43,11 +43,12 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 		} else {
 			metrics := []backstop.Metric{
 				backstop.Metric{
-					Name:      "containers",
+					Name:      hostname + ".containers",
 					Value:     int64(len(containers)),
 					Timestamp: time.Now().Unix(),
 				},
 			}
+			log.Printf("%s: %d", hostname+".containers", len(containers))
 
 			for _, container := range containers {
 				prefix := computePrefix(&container, prefixRule)
