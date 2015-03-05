@@ -49,34 +49,36 @@ func (server *Server) Serve() {
 			categories := make(map[string]int64)
 
 			metrics := []backstop.Metric{}
-			log.Printf("Processing %d containers", len(containers))
 			now := time.Now().Unix()
 
 			for _, container := range containers {
 				prefix, category := ApplyRules(server.Rules, container.Name())
 
-				log.Printf("Processing container %s (%s: %s)\n", container.Id[:12], prefix, category)
+				log.Printf("Processing container %s ('%s': '%s')\n", container.Id[:12], prefix, category)
 				stats, err := dockerApi.GetContainerStats(container.Id)
 				if err != nil {
 					log.Printf("ERROR: cannot get container stats: %s\n", err)
 					continue
 				}
 				metrics = append(metrics, translate.Translate(prefix, stats)...)
-				categories[category] += 1
+				if category != "" {
+					categories[category] += 1
+				}
 			}
 
-			total := int64(0)
+			log.Printf("Container total: %d\n", len(containers))
+
 			for category, value := range categories {
+				log.Printf("Container %s: %d\n", category, value)
 				metrics = append(metrics, backstop.Metric{
 					Name:      server.Hostname + ".containers." + category,
 					Value:     value,
 					Timestamp: now,
 				})
-				total += value
 			}
 			metrics = append(metrics, backstop.Metric{
 				Name:      server.Hostname + ".containers.total",
-				Value:     total,
+				Value:     int64(len(containers)),
 				Timestamp: now,
 			})
 
