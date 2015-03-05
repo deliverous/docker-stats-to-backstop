@@ -41,10 +41,12 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 		if containers, err := dockerApi.GetContainers(); err != nil {
 			log.Printf("ERROR: cannot get docker containers list: %s", err)
 		} else {
-			containersMetrics := backstop.Metric{
-				Name:      "containers",
-				Value:     int64(len(containers)),
-				Timestamp: time.Now().Unix(),
+			metrics := []backstop.Metric{
+				backstop.Metric{
+					Name:      "containers",
+					Value:     int64(len(containers)),
+					Timestamp: time.Now().Unix(),
+				},
 			}
 
 			for _, container := range containers {
@@ -56,15 +58,12 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 					log.Printf("ERROR: cannot get container stats: %s\n", err)
 					continue
 				}
-				err = backstop.SendMetrics(client, backstopUrl, translate.Translate(prefix, stats), verbose)
-				if err != nil {
-					log.Printf("ERROR: cannot send container stats: %s\n", err)
-				}
+				metrics = append(metrics, translate.Translate(prefix, stats)...)
 			}
 
-			err = backstop.SendMetrics(client, backstopUrl, []backstop.Metric{containersMetrics}, verbose)
+			err = backstop.SendMetrics(client, backstopUrl, metrics, verbose)
 			if err != nil {
-				log.Printf("ERROR: cannot send containers stats: %s\n", err)
+				log.Printf("ERROR: cannot send stats: %s\n", err)
 			}
 		}
 
