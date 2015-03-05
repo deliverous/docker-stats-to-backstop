@@ -6,3 +6,11 @@ type Container struct {
 	Image string   ``
 	Names []string ``
 }
+
+func (container Container) Name() string {
+	if len(container.Names) > 0 {
+		return container.Names[0]
+	} else {
+		return container.Id
+	}
+}

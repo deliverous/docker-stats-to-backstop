@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	help        = flag.Bool("help", false, "Get help")
-	backstopUrl = flag.String("backstop", env("SRV_BACKSTOP", ""), "URL for connecting backsop server")
-	dockerUrl   = flag.String("docker", env("SRV_DOCKER", "unix:///var/run/docker.sock"), "URL for connecting docker server")
-	prefix      = flag.String("prefix", env("SRV_PREFIX", ""), "JSON containing 'regexp' and 'into' to rewrite the container name into graphite identifier")
-	poll        = flag.String("poll", env("SRV_POLL", "5m"), "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
-	verbose     = flag.Bool("verbose", false, "Enable the verbose mode")
+	help            = flag.Bool("help", false, "Get help")
+	backstopURL     = flag.String("backstop", env("SRV_BACKSTOP", ""), "URL for connecting backsop server")
+	dockerURL       = flag.String("docker", env("SRV_DOCKER", "unix:///var/run/docker.sock"), "URL for connecting docker server")
+	rulesDefinition = flag.String("rules", env("SRV_RULES", ""), "JSON containing 'regexp','into' and 'category' to rewrite the container name into graphite identifier")
+	pollDefinition  = flag.String("poll", env("SRV_POLL", "5m"), "Set the poll delay. Valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'")
+	verbose         = flag.Bool("verbose", false, "Enable the verbose mode")
 )
 
 func main() {
@@ -26,9 +26,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	duration, err := time.ParseDuration(*poll)
+	poll, err := time.ParseDuration(*pollDefinition)
 	if err != nil {
-		log.Fatalf("ERROR: cannot parse duration '%s': %s", *poll, err)
+		log.Fatalf("ERROR: cannot parse duration '%s': %s", *pollDefinition, err)
 	}
 
 	hostname, err := os.Hostname()
@@ -36,7 +36,21 @@ func main() {
 		log.Fatalf("ERROR: cannot get hostname : %s", err)
 	}
 
-	server.ServeForever(*dockerUrl, *backstopUrl, *prefix, duration, *verbose, hostname)
+	rules, err := server.LoadRules(*rulesDefinition)
+	if err != nil {
+		log.Fatalf("ERROR: cannot load rules '%s' : %s", *rulesDefinition, err)
+	}
+
+	srv := &server.Server{
+		Hostname:    hostname,
+		DockerURL:   *dockerURL,
+		BackstopURL: *backstopURL,
+		Poll:        poll,
+		Rules:       rules,
+		Verbose:     *verbose,
+	}
+
+	srv.Serve()
 }
 
 func env(key string, missing string) string {

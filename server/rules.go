@@ -15,7 +15,7 @@ type Rule struct {
 
 type Rules []*Rule
 
-func loadRules(definition string) (*Rules, error) {
+func LoadRules(definition string) (*Rules, error) {
 	rules := &Rules{}
 	if definition == "" {
 		return rules, nil
@@ -34,7 +34,7 @@ func loadRules(definition string) (*Rules, error) {
 	return rules, nil
 }
 
-func applyRules(rules *Rules, name string) (prefix string, category string) {
+func ApplyRules(rules *Rules, name string) (prefix string, category string) {
 	prefix = strings.TrimPrefix(name, "/")
 	for _, rule := range *rules {
 		if rule.Parsed == nil {

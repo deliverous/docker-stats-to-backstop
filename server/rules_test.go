@@ -23,7 +23,7 @@ func Test_ApplyRules_MultipleRules(t *testing.T) {
 }
 
 func witRules(t *testing.T, definitions string) *Rules {
-	rules, err := loadRules(definitions)
+	rules, err := LoadRules(definitions)
 	if err != nil {
 		t.Fatalf("unexpected error on '%s': %#v", definitions, err)
 	}
@@ -31,7 +31,7 @@ func witRules(t *testing.T, definitions string) *Rules {
 }
 
 func ensure(t *testing.T, rules *Rules, container, expectedPrefix, expectedCategory string) {
-	prefix, category := applyRules(rules, container)
+	prefix, category := ApplyRules(rules, container)
 	if prefix != expectedPrefix {
 		t.Errorf("applyRules failed:\nexpected %#v,\ngot      %#v", expectedPrefix, prefix)
 	}
