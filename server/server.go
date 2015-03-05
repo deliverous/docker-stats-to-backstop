@@ -7,6 +7,7 @@ import (
 	"github.com/deliverous/docker-stats-to-backstop/translate/docker"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -70,4 +71,12 @@ func ServeForever(dockerUrl string, backstopUrl string, prefix string, duration 
 
 		time.Sleep(duration)
 	}
+}
+
+func reverseHostname(hostname string) string {
+	parts := strings.Split(hostname, ".")
+	for i, j := 0, len(parts)-1; i < j; i, j = i+1, j-1 {
+		parts[i], parts[j] = parts[j], parts[i]
+	}
+	return strings.Join(parts, ".")
 }
