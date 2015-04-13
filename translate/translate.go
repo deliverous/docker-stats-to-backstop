@@ -16,6 +16,7 @@ func Translate(prefix string, stats *docker.ContainerStats) []backstop.Metric {
 	c.add("memory.usage", stats.Memory.Usage)
 	c.add("memory.max_usage", stats.Memory.MaxUsage)
 	c.add("memory.limit", stats.Memory.Limit)
+	c.add("memory.cache", stats.Memory.Stats["total_cache"])
 	c.add("network.rx_bytes", stats.Network.RxBytes)
 	c.add("network.rx_packets", stats.Network.RxPackets)
 	c.add("network.rx_errors", stats.Network.RxErrors)

@@ -35,7 +35,8 @@ type CpuUsageStats struct {
 }
 
 type MemoryStats struct {
-	Usage    *int64 `json:"usage"`
-	MaxUsage *int64 `json:"max_usage"`
-	Limit    *int64 `json:"limit"`
+	Usage    *int64            `json:"usage"`
+	MaxUsage *int64            `json:"max_usage"`
+	Limit    *int64            `json:"limit"`
+	Stats    map[string]*int64 `json:"stats"`
 }
