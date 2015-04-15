@@ -47,7 +47,7 @@ func Test_ParseDockerStats_MemoryStats(t *testing.T) {
 	checkIntValue(t, "Limit", 2147483648, stats.Memory.Limit)
 }
 
-func checkIntValue(t *testing.T, fieldName string, expected int64, got *int64) {
+func checkIntValue(t *testing.T, fieldName string, expected uint64, got *uint64) {
 	if *got != expected {
 		t.Errorf("'%s' verification failed: got %d, expected %d", fieldName, *got, expected)
 	}

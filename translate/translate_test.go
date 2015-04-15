@@ -14,7 +14,7 @@ func Test_CpuStats(t *testing.T) {
 	checkCpuStats(t, docker.CpuStats{CpuUsage: docker.CpuUsageStats{UsageInUsermode: v(1000)}}, "prefix.cpu.user", 1000)
 }
 
-func checkCpuStats(t *testing.T, stats docker.CpuStats, name string, value int64) {
+func checkCpuStats(t *testing.T, stats docker.CpuStats, name string, value uint64) {
 	checkTranslation(t, &docker.ContainerStats{Cpu: stats}, name, value)
 }
 
@@ -24,7 +24,7 @@ func Test_MemoryStats(t *testing.T) {
 	checkMemoryStats(t, docker.MemoryStats{Limit: v(512)}, "prefix.memory.limit", 512)
 }
 
-func checkMemoryStats(t *testing.T, stats docker.MemoryStats, name string, value int64) {
+func checkMemoryStats(t *testing.T, stats docker.MemoryStats, name string, value uint64) {
 	checkTranslation(t, &docker.ContainerStats{Memory: stats}, name, value)
 }
 
@@ -39,11 +39,11 @@ func Test_NetworkStats(t *testing.T) {
 	checkNetworkStats(t, docker.NetworkStats{TxDropped: v(100)}, "prefix.network.tx_dropped", 100)
 }
 
-func checkNetworkStats(t *testing.T, stats docker.NetworkStats, name string, value int64) {
+func checkNetworkStats(t *testing.T, stats docker.NetworkStats, name string, value uint64) {
 	checkTranslation(t, &docker.ContainerStats{Network: stats}, name, value)
 }
 
-func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, value int64) {
+func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, value uint64) {
 	stats.Timestamp = time.Date(2015, time.February, 23, 8, 39, 6, 0, time.UTC)
 	metrics := Translate("prefix", stats)
 	if len(metrics) != 1 {
@@ -60,6 +60,6 @@ func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, v
 	}
 }
 
-func v(value int64) *int64 {
+func v(value uint64) *uint64 {
 	return &value
 }

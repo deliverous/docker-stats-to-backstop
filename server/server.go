@@ -61,7 +61,7 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 	if containers, err := dockerApi.GetContainers(); err != nil {
 		log.Printf("ERROR: cannot get docker containers list: %s", err)
 	} else {
-		categories := make(map[string]int64)
+		categories := make(map[string]uint64)
 
 		metrics := []backstop.Metric{}
 		now := time.Now().Unix()
@@ -95,19 +95,19 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 		}
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".containers.total",
-			Value:     int64(len(containers)),
+			Value:     uint64(len(containers)),
 			Timestamp: now,
 		})
 
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".metrics.threads",
-			Value:     int64(concurrency),
+			Value:     uint64(concurrency),
 			Timestamp: now,
 		})
 
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".metrics.duration",
-			Value:     int64(delta),
+			Value:     uint64(delta),
 			Timestamp: now,
 		})
 

@@ -13,30 +13,34 @@ type ContainerStats struct {
 }
 
 type NetworkStats struct {
-	RxBytes   *int64 `json:"rx_bytes"`
-	RxPackets *int64 `json:"rx_packets"`
-	RxErrors  *int64 `json:"rx_errors"`
-	RxDropped *int64 `json:"rx_dropped"`
-	TxBytes   *int64 `json:"tx_bytes"`
-	TxPackets *int64 `json:"tx_packets"`
-	TxErrors  *int64 `json:"tx_errors"`
-	TxDropped *int64 `json:"tx_dropped"`
+	RxBytes   *uint64 `json:"rx_bytes"`
+	RxPackets *uint64 `json:"rx_packets"`
+	RxErrors  *uint64 `json:"rx_errors"`
+	RxDropped *uint64 `json:"rx_dropped"`
+	TxBytes   *uint64 `json:"tx_bytes"`
+	TxPackets *uint64 `json:"tx_packets"`
+	TxErrors  *uint64 `json:"tx_errors"`
+	TxDropped *uint64 `json:"tx_dropped"`
 }
 
 type CpuStats struct {
 	CpuUsage       CpuUsageStats `json:"cpu_usage"`
-	SystemCpuUsage *int64        `json:"system_cpu_usage"`
+	SystemCpuUsage *uint64       `json:"system_cpu_usage"`
 }
 
 type CpuUsageStats struct {
-	TotalUsage        *int64 `json:"total_usage"`
-	UsageInKernelmode *int64 `json:"usage_in_kernelmode"`
-	UsageInUsermode   *int64 `json:"usage_in_usermode"`
+	TotalUsage        *uint64 `json:"total_usage"`
+	UsageInKernelmode *uint64 `json:"usage_in_kernelmode"`
+	UsageInUsermode   *uint64 `json:"usage_in_usermode"`
 }
 
 type MemoryStats struct {
-	Usage    *int64            `json:"usage"`
-	MaxUsage *int64            `json:"max_usage"`
-	Limit    *int64            `json:"limit"`
-	Stats    map[string]*int64 `json:"stats"`
+	Usage    *uint64            `json:"usage"`
+	MaxUsage *uint64            `json:"max_usage"`
+	Limit    *uint64            `json:"limit"`
+	Stats    MemoryDetailsStats `json:"stats"`
+}
+
+type MemoryDetailsStats struct {
+	TotalCache *uint64 `json:"total_cache"`
 }
