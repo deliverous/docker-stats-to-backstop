@@ -49,7 +49,7 @@ func activeMemory(stats *docker.ContainerStats) *uint64 {
 	usage := stats.Memory.Usage
 	cache := stats.Memory.Stats.TotalCache
 	if usage != nil && cache != nil {
-		active := *usage + *cache
+		active := *usage - *cache
 		return &active
 	}
 	return nil
