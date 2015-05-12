@@ -7,6 +7,7 @@ import (
 
 type ContainerJson struct {
 	State StateJson `json:"State"`
+	Name  string    `json:"Name"`
 }
 
 type StateJson struct {

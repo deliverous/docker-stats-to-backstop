@@ -67,24 +67,22 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 		now := time.Now()
 
 		for _, container := range containers {
-			prefix, category := ApplyRules(server.Rules, container.Name())
-
-			log.Printf("Processing container %s ('%s': '%s')\n", container.Id[:12], prefix, category)
-
-			stats, err := dockerApi.GetContainerStats(container.Id)
-			if err != nil {
-				log.Printf("ERROR: cannot get container stats: %s\n", err)
-				continue
-			}
-			metrics = append(metrics, translate.TranslateStats(prefix, stats)...)
-
+			log.Printf("Processing container %s", container.Id[:12])
 			json, err := dockerApi.GetContainerJson(container.Id)
 			if err != nil {
-				log.Printf("ERROR: cannot get container json: %s\n", err)
+				log.Printf("ERROR: cannot get container json: %s", err)
 				continue
 			}
-			metrics = append(metrics, translate.TranslateJson(prefix, json, now)...)
+			stats, err := dockerApi.GetContainerStats(container.Id)
+			if err != nil {
+				log.Printf("ERROR: cannot get container stats: %s", err)
+				continue
+			}
 
+			prefix, category := ApplyRules(server.Rules, json.Name)
+			log.Printf("Container %s processed as ('%s', '%s')", container.Id[:12], prefix, category)
+			metrics = append(metrics, translate.TranslateStats(prefix, stats)...)
+			metrics = append(metrics, translate.TranslateJson(prefix, json, now)...)
 			if category != "" {
 				categories[category] += 1
 			}
