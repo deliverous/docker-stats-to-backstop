@@ -64,7 +64,7 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 		categories := make(map[string]uint64)
 
 		metrics := []backstop.Metric{}
-		now := time.Now().Unix()
+		now := time.Now()
 
 		for _, container := range containers {
 			prefix, category := ApplyRules(server.Rules, container.Name())
@@ -75,7 +75,13 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 				log.Printf("ERROR: cannot get container stats: %s\n", err)
 				continue
 			}
-			metrics = append(metrics, translate.Translate(prefix, stats)...)
+			metrics = append(metrics, translate.TranslateStats(prefix, stats)...)
+			json, err := dockerApi.GetContainerJson(container.Id)
+			if err != nil {
+				log.Printf("ERROR: cannot get container json: %s\n", err)
+				continue
+			}
+			metrics = append(metrics, translate.TranslateJson(prefix, json, now)...)
 			if category != "" {
 				categories[category] += 1
 			}
@@ -90,25 +96,25 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 			metrics = append(metrics, backstop.Metric{
 				Name:      server.Hostname + ".containers." + category,
 				Value:     value,
-				Timestamp: now,
+				Timestamp: now.Unix(),
 			})
 		}
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".containers.total",
 			Value:     uint64(len(containers)),
-			Timestamp: now,
+			Timestamp: now.Unix(),
 		})
 
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".metrics.threads",
 			Value:     uint64(concurrency),
-			Timestamp: now,
+			Timestamp: now.Unix(),
 		})
 
 		metrics = append(metrics, backstop.Metric{
 			Name:      server.Hostname + ".metrics.duration",
 			Value:     uint64(delta),
-			Timestamp: now,
+			Timestamp: now.Unix(),
 		})
 
 		err = backstop.SendMetrics(client, server.BackstopURL, metrics, server.Verbose)

@@ -7,7 +7,14 @@ import (
 	"time"
 )
 
-func Translate(prefix string, stats *docker.ContainerStats) []backstop.Metric {
+func TranslateJson(prefix string, json *docker.ContainerJson, timestamp time.Time) []backstop.Metric {
+	c := collector{prefix: prefix, timestamp: timestamp, metrics: []backstop.Metric{}}
+	uptime := uint64(timestamp.Sub(json.State.StartedAt).Seconds())
+	c.add("uptime", &uptime)
+	return c.metrics
+}
+
+func TranslateStats(prefix string, stats *docker.ContainerStats) []backstop.Metric {
 	c := collector{prefix: prefix, timestamp: stats.Timestamp, metrics: []backstop.Metric{}}
 	c.add("cpu.system", stats.Cpu.SystemCpuUsage)
 	c.add("cpu.total", stats.Cpu.CpuUsage.TotalUsage)

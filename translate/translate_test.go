@@ -45,7 +45,7 @@ func checkNetworkStats(t *testing.T, stats docker.NetworkStats, name string, val
 
 func checkTranslation(t *testing.T, stats *docker.ContainerStats, name string, value uint64) {
 	stats.Timestamp = time.Date(2015, time.February, 23, 8, 39, 6, 0, time.UTC)
-	metrics := Translate("prefix", stats)
+	metrics := TranslateStats("prefix", stats)
 	if len(metrics) != 1 {
 		t.Fatalf("translation failed, should have only one metric: got %#v", metrics)
 	}

@@ -44,6 +44,14 @@ func (api *DockerApi) GetContainers() ([]Container, error) {
 	return containers, nil
 }
 
+func (api *DockerApi) GetContainerJson(container string) (*ContainerJson, error) {
+	json := &ContainerJson{}
+	if err := api.get(api.url("containers", container, "json"), json); err != nil {
+		return nil, err
+	}
+	return json, nil
+}
+
 func (api *DockerApi) GetContainerStats(container string) (*ContainerStats, error) {
 	stats := &ContainerStats{}
 	if err := api.get(api.url("containers", container, "stats"), stats); err != nil {
