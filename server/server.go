@@ -70,18 +70,21 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 			prefix, category := ApplyRules(server.Rules, container.Name())
 
 			log.Printf("Processing container %s ('%s': '%s')\n", container.Id[:12], prefix, category)
+
 			stats, err := dockerApi.GetContainerStats(container.Id)
 			if err != nil {
 				log.Printf("ERROR: cannot get container stats: %s\n", err)
 				continue
 			}
 			metrics = append(metrics, translate.TranslateStats(prefix, stats)...)
+
 			json, err := dockerApi.GetContainerJson(container.Id)
 			if err != nil {
 				log.Printf("ERROR: cannot get container json: %s\n", err)
 				continue
 			}
 			metrics = append(metrics, translate.TranslateJson(prefix, json, now)...)
+
 			if category != "" {
 				categories[category] += 1
 			}
