@@ -66,21 +66,28 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 		metrics := []backstop.Metric{}
 		now := time.Now()
 
+		log.Printf("Processing %d container(s)", len(containers))
+
 		for _, container := range containers {
-			log.Printf("Processing container %s", container.Id[:12])
+			if server.Verbose {
+				log.Printf("Processing container %s", container.Id[:12])
+			}
+
 			json, err := dockerApi.GetContainerJson(container.Id)
 			if err != nil {
-				log.Printf("ERROR: cannot get container json: %s", err)
+				log.Printf("ERROR: on container %s, cannot get container json: %s", container.Id[:12], err)
 				continue
 			}
 			stats, err := dockerApi.GetContainerStats(container.Id)
 			if err != nil {
-				log.Printf("ERROR: cannot get container stats: %s", err)
+				log.Printf("ERROR: on container %s, cannot get container stats: %s", container.Id[:12], err)
 				continue
 			}
 
 			prefix, category := ApplyRules(server.Rules, json.Name)
-			log.Printf("Container %s processed as ('%s', '%s')", container.Id[:12], prefix, category)
+			if server.Verbose {
+				log.Printf("Container %s processed as ('%s', '%s')", container.Id[:12], prefix, category)
+			}
 			metrics = append(metrics, translate.TranslateStats(prefix, stats)...)
 			metrics = append(metrics, translate.TranslateJson(prefix, json, now)...)
 			if category != "" {
@@ -90,10 +97,10 @@ func (server *Server) loop(client *http.Client, dockerApi *docker.DockerApi, con
 
 		delta := time.Now().Sub(start).Nanoseconds()
 
-		log.Printf("Container total: %d\n", len(containers))
-
 		for category, value := range categories {
-			log.Printf("Container %s: %d\n", category, value)
+			if server.Verbose {
+				log.Printf("Container %s: %d\n", category, value)
+			}
 			metrics = append(metrics, backstop.Metric{
 				Name:      server.Hostname + ".containers." + category,
 				Value:     value,
